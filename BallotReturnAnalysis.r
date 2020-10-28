@@ -1,5 +1,7 @@
 # R 4.02
-#install.packages("x") below if needed
+# install.packages("x") below if needed
+# rdata.table 1.13.1 Code for analyzing WA State matchbacks:
+# https://www.sos.wa.gov/elections/research/election-results-and-voters-pamphlets.aspx
 
 library(data.table)
 library(lubridate)
