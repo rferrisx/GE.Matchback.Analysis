@@ -17,9 +17,7 @@ fsum <- function(x) {sum(x,na.rm=TRUE)}
 setwd("D:/Politics/General.2020/BallotReturnStats/10.27.2020")
 # replace numberical variables in text as needed...
 print("For 10/27/2020, over 2.56M ballots returned with ~32K challenged ballots in WA. Almost 19K of these ballots are signature matching challenges. Another ~5K are missing signatures. Voters will should visit https://voter.votewa.gov and check their ballot status. For ballot status other than "Accepted", voters may want to contact or visit their county election department websites found at https://www.sos.wa.gov/elections/auditors .
-
 King county leads the the top five counties in turnout percentage at 53% based on October 7 VRDB registrants.  However King's current turnout percentage is actually 56% based on the latest registration data (Please See https://www.sos.wa.gov/elections/research/ballot-return-statistics.aspx ) This would suggest increases from October first time voter registration and/or reactivations.    8.7% of all returned ballots were by voters who last voted in 2018 or earlier. 174,176 of all returned ballots were by voters whose 'LastVoted' field is "NA" suggesting an increasing number of 'first time' voters in this election. General election return ballot data can be found: https://www.sos.wa.gov/elections/research/2020-general-election.aspx .  Based on past elections performances, a reasonable prediction for total votes would be 250K for the next two days then ~500K/day for the next 5 days. However, such a prediction would result in 5.25M returned ballots. Current total voters for this election are 4,866,924, although registrations will continue through election. Regardless of this comment, turnout will likely be record setting for every county."
-
 
 l1 <- as.data.table({})
 for(i in dir()) {l1 <- rbind(l1,fread(i),fill=TRUE)}
