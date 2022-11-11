@@ -151,14 +151,3 @@ BSR[County == "Whatcom" & ReturnMethod != "Mail",.(Sent=as.Date(mdy_hm(SentDate)
 BSR[County == "Whatcom",.(Sent=as.Date(mdy_hm(SentDate)), Received=as.Date(mdy_hm(ReceivedDate)))][,.(mean(Received - Sent))]
 BSR[County == "Whatcom",.(BallotStatus,Sent=as.Date(mdy_hm(SentDate)), Received=as.Date(mdy_hm(ReceivedDate)))][,.(mean(Received - Sent))]
 BSR[County == "Whatcom",.(BallotStatus,Sent=as.Date(mdy_hm(SentDate)), Received=as.Date(mdy_hm(ReceivedDate)))][,.(mean(Received - Sent)),.(BallotStatus)]
-
-
-
-
-
-
-
-
-
-
-
