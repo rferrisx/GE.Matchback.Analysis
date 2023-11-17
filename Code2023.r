@@ -1,15 +1,15 @@
 # 2023 Gen Ballot matchbacks
 library(data.table)
 library(lattice)
-setwd("F:/Elections")
+setwd("F:/Elections") #set your own path
 # Data from https://www.sos.wa.gov/elections/data-research/2023-general-election
 # Column names don't work without adjustment for fread()
 col_names <- c("BallotID","VoterID","County","FirstName","LastName","Gender","Election","BallotStatus","ChallengeReason","SentDate","ReceivedDate","Address","City","State","Zip","Country","Split","Precinct","ReturnMethod","ReturnLocation","Party","V1")
 # Binds all counties
 All <- rbind(
-fread("F:/Elections/Ballot Status Report 2023-11-15 All Other Counties.csv",col.names=col_names),
-fread("Ballot Status Report 2023-11-15 PI SN SP TH.csv",col.names=col_names),
-fread("Ballot Status Report 2023-11-15 KI.csv",col.names=col_names))
+fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names),
+fread("Ballot Status Report 2023-11-16 PI SN SP TH.csv",col.names=col_names),
+fread("Ballot Status Report 2023-11-16 KI.csv",col.names=col_names))
 
 # Summary information for All Counties
 All[,.N,.(duplicated(BallotID))]
@@ -76,41 +76,41 @@ Small.Whatcom[,.N,.(PrecinctDecade=as.integer(Precinct)%/%10)][order(-N)][1:22]
  
  
   merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,20)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Unsigned")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","Unsigned","Ballots"))][,
 	.SD[,.(pctUnsigned=round((Unsigned/Ballots) * 100,3))],.(County,Unsigned,Ballots)][order(-Ballots)]
   
  merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,19)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Too Late")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","TooLate","Ballots"))][,
 	.SD[,.(pctTooLate=round((TooLate/Ballots) * 100,3))],.(County,TooLate,Ballots)][order(-Ballots)]
 	
  merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,18)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Signature Does Not Match")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","SignatureNotMatch","Ballots"))][,
 	.SD[,.(pctSigNotMatch=round((SignatureNotMatch/Ballots) * 100,3))],.(County,SignatureNotMatch,Ballots)][order(-Ballots)]
 	
 m1 <-	
  merge(
   merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,20)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Unsigned")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","Unsigned","Ballots"))][,
 	.SD[,.(pctUnsigned=round((Unsigned/Ballots) * 100,3))],.(County,Unsigned,Ballots)][order(-Ballots)],
   
  merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,19)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Too Late")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","TooLate","Ballots"))][,
 	.SD[,.(pctTooLate=round((TooLate/Ballots) * 100,3))],.(County,TooLate,Ballots)][order(-Ballots)], by=c("County","Ballots"))
 	
  m2 <- merge(m1,
  merge(All[ChallengeReason !="",.N,.(County,ChallengeReason)][,
-	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c(1,18)],
+	dcast(.SD,County ~ ChallengeReason ,value.var="N",fun.aggregate=sum)][,c("County","Signature Does Not Match")],
 	All[,.N,.(County)],by="County")[,setnames(.SD, c("County","SignatureNotMatch","Ballots"))][,
 	.SD[,.(pctSigNotMatch=round((SignatureNotMatch/Ballots) * 100,3))],.(County,SignatureNotMatch,Ballots)][order(-Ballots)], by=c("County","Ballots"))
 
 m3 <- m2[,.(County,Ballots,Unsigned,TooLate,SignatureNotMatch,pctUnsigned,pctTooLate,pctSigNotMatch)][order(-Ballots)]
 m3
-
+# Charts of Matchbacks grouped by County Vote Return
 dev.new();plot.new()
 m3[County == "King",barchart(~ TooLate+Unsigned+SignatureNotMatch | County,main="King County",origin=0,stack=TRUE,lwd=3,auto.key=TRUE)]
 
@@ -124,8 +124,7 @@ dev.new();plot.new()
 m3[Ballots < 25000,barchart(~ TooLate+Unsigned+SignatureNotMatch | County,main="Total Ballots LT 25,000",origin=0,stack=TRUE,lwd=3,auto.key=TRUE)]
 	
  
-
-setwd("F:/Elections")
+setwd("F:/Elections") #set your own paths
 # Code to pair Precinct Returns (from Whatcom County) with Matchback Totals
 fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Status","Precinct1","Precinct2","Votes"))][,unique(Race)]
 fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Candidate","Precinct1","Precinct2","Votes"))][
@@ -137,7 +136,7 @@ fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Candidate","Preci
 	Race == "LEGISLATIVE DISTRICT 40 - State Representative Pos. 1" | Race == "LEGISLATIVE DISTRICT 42 - State Representative Pos. 1",][
 	!grepl("Total",Precinct) & Candidate != "WRITE-IN",dcast(.SD,Precinct~Candidate,value.var="Votes",fun.aggregate=sum)],
 	
-fread("F:/Elections/Ballot Status Report 2023-11-15 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
+fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
 setnames(.SD,c("Precinct","Alicia.Rule","Debra.Lekanoff","Shannon.Perkes","Tawsha.Dykstra.Thompson","x2023BallotsToDate"))]
 # [order(-x2023BallotsToDate)][1:40]
 
@@ -146,7 +145,7 @@ fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Candidate","Preci
 	Race == "LEGISLATIVE DISTRICT 40 - State Representative Pos. 1" | Race == "LEGISLATIVE DISTRICT 42 - State Representative Pos. 1",][
 	!grepl("Total",Precinct) & Candidate != "WRITE-IN",dcast(.SD,Precinct~Candidate,value.var="Votes",fun.aggregate=sum)],
 	
-fread("F:/Elections/Ballot Status Report 2023-11-15 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
+fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
 setnames(.SD,c("Precinct","Alicia.Rule","Debra.Lekanoff","Shannon.Perkes","Tawsha.Dykstra.Thompson","x2023BallotsToDate"))]
 
 m2022wmb2023[Alicia.Rule > 1 | Tawsha.Dykstra.Thompson > 1,
@@ -163,11 +162,3 @@ dev.new();plot.new()
 All[,.N,.(VoterID1E3=as.numeric(VoterID)%/%1000)][order(-N)][N > 100,][order(VoterID1E3)][,xyplot(N ~ VoterID1E3)]
 dev.new();plot.new()
 All[,.N,.(BallotID1E4=as.numeric(VoterID)%/%10000)][order(-N)][N > 1000,][order(BallotID1E4)][,xyplot(N ~ BallotID1E4)]
-
-
-
-
-
-
-
-
