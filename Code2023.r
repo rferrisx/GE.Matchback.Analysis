@@ -1,6 +1,6 @@
 # 2023 Gen Ballot matchback analysis
 # 11/22/2023  In a draft phase .... lots of different functionality now included
-# some redundancy in table output
+# some redundancy in table output ...
 library(data.table)
 library(lattice)
 library(lubridate)
@@ -35,7 +35,6 @@ All[BallotStatus == "Rejected" & ChallengeReason == "Unsigned",.N,.(County,Chall
 merge(All[BallotStatus == "Rejected",.N,.(County)][,.(Rejected=N,County)],All[,.(TotalBallots=length(BallotStatus)),.(County)],by="County")[,.SD[,.(RejectPCT=round(Rejected/TotalBallots * 100,2))],.(County,Rejected,TotalBallots)]
 RejectedDensity <- All[,.(Rejected=sum(BallotStatus == "Rejected"),Voters=length(VoterID)),.(City)];RejectedDensity[,RejectedPCT:=(Rejected/Voters) * 100];RejectedDensity[Voters > 40000,][order(-RejectedPCT)] 
 RejectedDensity <- All[,.(Rejected=sum(BallotStatus == "Rejected"),Voters=length(VoterID)),.(County)];RejectedDensity[,RejectedPCT:=(Rejected/Voters) * 100];RejectedDensity[Voters > 80000,][order(-RejectedPCT)]
-
 
 # Whatcom County only summary information  
 Small.Whatcom <- fread("F:/Elections/Ballot Status Report 2023-11-21 All Other Counties.csv",col.names=col_names)[County == "Whatcom",]
@@ -244,16 +243,3 @@ Voted.Regd.Active <- merge(fread("KI.txt"),All[County == "King",],all=TRUE,by.x=
 		sub="For King County WA")]
 		
 setwd("F:/Elections") #set your own path
-
-
-
-	
-
-
-
-
-
-
-
-
-
