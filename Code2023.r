@@ -1,15 +1,18 @@
-# 2023 Gen Ballot matchbacks
+# 2023 Gen Ballot matchback analysis
+# 11/22/2023  In a draft phase .... lots of different functionality now included
+# some redundancy in table output
 library(data.table)
 library(lattice)
+library(lubridate)
 setwd("F:/Elections") #set your own path
 # Data from https://www.sos.wa.gov/elections/data-research/2023-general-election
 # Column names don't work without adjustment for fread()
 col_names <- c("BallotID","VoterID","County","FirstName","LastName","Gender","Election","BallotStatus","ChallengeReason","SentDate","ReceivedDate","Address","City","State","Zip","Country","Split","Precinct","ReturnMethod","ReturnLocation","Party","V1")
 # Binds all counties
 All <- rbind(
-fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names),
-fread("Ballot Status Report 2023-11-16 PI SN SP TH.csv",col.names=col_names),
-fread("Ballot Status Report 2023-11-16 KI.csv",col.names=col_names))
+fread("F:/Elections/Ballot Status Report 2023-11-21 All Other Counties.csv",col.names=col_names),
+fread("Ballot Status Report 2023-11-21 PI SN SP TH.csv",col.names=col_names),
+fread("Ballot Status Report 2023-11-21 KI.csv",col.names=col_names))
 
 # Summary information for All Counties
 All[,.N,.(duplicated(BallotID))]
@@ -35,7 +38,7 @@ RejectedDensity <- All[,.(Rejected=sum(BallotStatus == "Rejected"),Voters=length
 
 
 # Whatcom County only summary information  
-Small.Whatcom <- fread("F:/Elections/Ballot Status Report 2023-11-15 All Other Counties.csv",col.names=col_names)[County == "Whatcom",]
+Small.Whatcom <- fread("F:/Elections/Ballot Status Report 2023-11-21 All Other Counties.csv",col.names=col_names)[County == "Whatcom",]
 Small.Whatcom[,.N,.(ReturnMethod)][order(-N)]
 Small.Whatcom[,.N,.(BallotStatus)] [order(-N)]
 Small.Whatcom[BallotStatus == "Rejected",.N,.(ChallengeReason)] [order(-N)]
@@ -47,10 +50,23 @@ Small.Whatcom[,.N,.(Precinct)][order(-N)][1:20]
 Small.Whatcom[,.N,.(Precinct)][order(-N)][1:40]
 Small.Whatcom[,.N,.(PrecinctDecade=as.integer(Precinct)%/%10)][order(-N)][1:22]
 
- All[,.N]
- All[BallotStatus == "Rejected",.N]
- Small.Whatcom[,.N]
- Small.Whatcom[BallotStatus == "Rejected",.N]
+All[,.N]
+All[BallotStatus == "Rejected",.N]
+Small.Whatcom[,.N]
+Small.Whatcom[BallotStatus == "Rejected",.N]
+ 
+ 
+# More granular Challenge Reason
+Small.Whatcom[,.N,.(ReceivedDate,BallotStatus)][,dcast(.SD,mdy_hms(ReceivedDate) ~ BallotStatus,value.var="N",fun.aggregate=sum)]
+All[,.N,.(ReceivedDate,BallotStatus)][,dcast(.SD,mdy_hms(ReceivedDate) ~ BallotStatus,value.var="N",fun.aggregate=sum)]
+All[,.N,.(ReceivedDate,ChallengeReason)][,dcast(.SD,mdy_hms(ReceivedDate) ~ ChallengeReason,value.var="N",fun.aggregate=sum)]
+Small.Whatcom[,.N,.(ReceivedDate,ChallengeReason)][,dcast(.SD,mdy_hms(ReceivedDate) ~ ChallengeReason,value.var="N",fun.aggregate=sum)]
+All[,.N,.(ReceivedDate,ChallengeReason)][,dcast(.SD,mdy_hms(ReceivedDate) ~ ChallengeReason,value.var="N",fun.aggregate=sum)][,c("Signature Does Not Match","Unsigned","Too Late")]
+All[,.N,.(ReceivedDate,ChallengeReason)][,dcast(.SD,mdy_hms(ReceivedDate) ~ ChallengeReason,value.var="N",fun.aggregate=sum)][,c( "ReceivedDate","V1","Signature Does Not Match","Unsigned","Too Late")]
+history(10)
+ 
+ 
+ 
 
  # Top 10 Challenge Reasons Statewide 
  All[BallotStatus == "Rejected",.N,.(ChallengeReason)] [order(-N)][1:10]
@@ -136,7 +152,7 @@ fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Candidate","Preci
 	Race == "LEGISLATIVE DISTRICT 40 - State Representative Pos. 1" | Race == "LEGISLATIVE DISTRICT 42 - State Representative Pos. 1",][
 	!grepl("Total",Precinct) & Candidate != "WRITE-IN",dcast(.SD,Precinct~Candidate,value.var="Votes",fun.aggregate=sum)],
 	
-fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
+fread("F:/Elections/Ballot Status Report 2023-11-21 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
 setnames(.SD,c("Precinct","Alicia.Rule","Debra.Lekanoff","Shannon.Perkes","Tawsha.Dykstra.Thompson","x2023BallotsToDate"))]
 # [order(-x2023BallotsToDate)][1:40]
 
@@ -145,7 +161,7 @@ fread("20221108_whatcomprecincts.csv")[,setnames(.SD,c("Race","Candidate","Preci
 	Race == "LEGISLATIVE DISTRICT 40 - State Representative Pos. 1" | Race == "LEGISLATIVE DISTRICT 42 - State Representative Pos. 1",][
 	!grepl("Total",Precinct) & Candidate != "WRITE-IN",dcast(.SD,Precinct~Candidate,value.var="Votes",fun.aggregate=sum)],
 	
-fread("F:/Elections/Ballot Status Report 2023-11-16 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
+fread("F:/Elections/Ballot Status Report 2023-11-21 All Other Counties.csv",col.names=col_names)[County == "Whatcom",][,.N,.(Precinct)], by="Precinct")[,
 setnames(.SD,c("Precinct","Alicia.Rule","Debra.Lekanoff","Shannon.Perkes","Tawsha.Dykstra.Thompson","x2023BallotsToDate"))]
 
 m2022wmb2023[Alicia.Rule > 1 | Tawsha.Dykstra.Thompson > 1,
@@ -157,8 +173,87 @@ m2022wmb2023[,RVotes:= (1 - Dpct) * x2023BallotsToDate]
 m2022wmb2023[,.(TotalDVotes=sum(DVotes),TotalRVotes=sum(RVotes))]
 m2022wmb2023
 
+
+Jail <- fread("20231107_whatcom_Prop4-precincts.csv",skip=1, col.names=c("Precinct","YesProp4","NoProp4"))[
+	Precinct != "Total",.SD[,.(PCT.yes=round(YesProp4/(YesProp4+NoProp4),3))],.(Precinct,YesProp4,NoProp4)]
+	
+merge(m2022wmb2023,Jail,all=TRUE,by="Precinct")
+
+
 # Speculative
 dev.new();plot.new()
 All[,.N,.(VoterID1E3=as.numeric(VoterID)%/%1000)][order(-N)][N > 100,][order(VoterID1E3)][,xyplot(N ~ VoterID1E3)]
 dev.new();plot.new()
 All[,.N,.(BallotID1E4=as.numeric(VoterID)%/%10000)][order(-N)][N > 1000,][order(BallotID1E4)][,xyplot(N ~ BallotID1E4)]
+
+# merge Voter History with matchbacks to produce participation by Age charts
+setwd("F:/Elections") #set your own path >= 2020
+# For Whatcom
+Voted.Regd.Active <- merge(fread("WM.txt"),Small.Whatcom,all=TRUE,by.x="StateVoterID",by.y="VoterID")[StatusCode == "Active",]
+dev.new();plot.new()
+Voted.Regd.Active[!is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) >= 2020 & as.integer(Birthyear) >= (2023 - 80),
+	.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,2000),col="blue",lwd=3,cex=2,pch=19,
+	main="Status Active,Some Ballot Status GE 2023 & Last Year Voted >= 2020 & Age <= 80",
+	sub="For Whatcom County WA")]
+dev.new();plot.new()
+Voted.Regd.Active[is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) >= 2020 & as.integer(Birthyear) >= (2023 - 80),
+	.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,2000),col="red",lwd=3,cex=2,pch=19,
+	main="Status Active,No Ballot Recorded GE 2023 & Last Year Voted >= 2020 & Age <= 80",
+	sub="For Whatcom County WA")]
+	
+setwd("F:/Elections/KingCounty") #set your own path >= 2020
+# For King	
+Voted.Regd.Active <- merge(fread("KI.txt"),All[County == "King",],all=TRUE,by.x="StateVoterID",by.y="VoterID")[StatusCode == "Active",]
+	dev.new();plot.new()
+	Voted.Regd.Active[!is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) >= 2020 & as.integer(Birthyear) >= (2023 - 80),
+		.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,20000),col="blue",lwd=3,cex=2,pch=19,
+		main="Status Active,Some Ballot Status GE 2023 & Last Year Voted >= 2020 & Age <= 80",
+		sub="For King County WA")]
+	dev.new();plot.new()
+	Voted.Regd.Active[is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) >= 2020 & as.integer(Birthyear) >= (2023 - 80),
+		.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,20000),col="red",lwd=3,cex=2,pch=19,
+		main="Status Active,No Ballot Recorded GE 2023 & Last Year Voted >= 2020 & Age <= 80",
+		sub="For King County WA")]
+		
+setwd("F:/Elections") #set your own path for < 2020
+# For Whatcom
+Voted.Regd.Active <- merge(fread("WM.txt"),Small.Whatcom,all=TRUE,by.x="StateVoterID",by.y="VoterID")[StatusCode == "Active",]
+dev.new();plot.new()
+Voted.Regd.Active[!is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) < 2020 & as.integer(Birthyear) >= (2023 - 80),
+	.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,2000),col="blue",lwd=3,cex=2,pch=19,
+	main="Status Active,Some Ballot Status GE 2023 & Last Year Voted < 2020 & Age <= 80",
+	sub="For Whatcom County WA")]
+dev.new();plot.new()
+Voted.Regd.Active[is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) < 2020 & as.integer(Birthyear) >= (2023 - 80),
+	.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,2000),col="red",lwd=3,cex=2,pch=19,
+	main="Status Active,No Ballot Recorded GE 2023 & Last Year Voted < 2020 & Age <= 80",
+	sub="For Whatcom County WA")]
+	
+setwd("F:/Elections/KingCounty") #set your own path for < 2020
+# For King	
+Voted.Regd.Active <- merge(fread("KI.txt"),All[County == "King",],all=TRUE,by.x="StateVoterID",by.y="VoterID")[StatusCode == "Active",]
+	dev.new();plot.new()
+	Voted.Regd.Active[!is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) < 2020 & as.integer(Birthyear) >= (2023 - 80),
+		.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,20000),col="blue",lwd=3,cex=2,pch=19,
+		main="Status Active,Some Ballot Status GE 2023 & Last Year Voted < 2020 & Age <= 80",
+		sub="For King County WA")]
+	dev.new();plot.new()
+	Voted.Regd.Active[is.na(BallotStatus) & as.integer(year(ymd(LastVoted))) < 2020 & as.integer(Birthyear) >= (2023 - 80),
+		.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,20000),col="red",lwd=3,cex=2,pch=19,
+		main="Status Active,No Ballot Recorded GE 2023 & Last Year Voted < 2020 & Age <= 80",
+		sub="For King County WA")]
+		
+setwd("F:/Elections") #set your own path
+
+
+
+	
+
+
+
+
+
+
+
+
+
