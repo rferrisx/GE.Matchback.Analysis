@@ -191,8 +191,7 @@ m2022wmb2023[Debra.Lekanoff > 1 | Shannon.Perkes > 1,
 m2022wmb2023[,DVotes:= Dpct * x2023BallotsToDate]
 m2022wmb2023[,RVotes:= (1 - Dpct) * x2023BallotsToDate]
 m2022wmb2023[,.(TotalDVotes=sum(DVotes),TotalRVotes=sum(RVotes))]
-m2022wmb2023
-
+m2022wmb202
 
 ## That Whatcom county jail vote!!
 Jail <- fread("20231107_whatcom_Prop4-precincts.csv",skip=1, col.names=c("Precinct","YesProp4","NoProp4"))[
@@ -263,7 +262,6 @@ Voted.Regd.ActiveWM[,.N,.(PrecinctCode,StatusCode,BallotStatus)][,
 	totalPotVotes=sum(Accepted+Rejected+NotVoted),
 	pctVoted=round((Accepted + Rejected)/(Accepted + Rejected + NotVoted),3))],
  .(PrecinctCode,NotVoted,Accepted,Rejected)][order(PrecinctCode)]}
-
 	
 setwd("F:/Elections/KingCounty") #set your own path >= 2020
 # For King	
@@ -297,7 +295,6 @@ Voted.Regd.ActiveKI[,.N,.(PrecinctCode,StatusCode,BallotStatus)][,
 	pctVoted=round((Accepted + Rejected)/(Accepted + Rejected + NotVoted),3))],
  .(PrecinctCode,NotVoted,Accepted,Rejected)][order(PrecinctCode)]}
 
-
 ## Scratch
 # Optional		
 setwd("F:/Elections") #set your own path for < 2020
@@ -327,17 +324,3 @@ Voted.Regd.Active <- merge(fread("KI.txt"),All[County == "King",],all=TRUE,by.x=
 		.N,.(Age=2023 - as.integer(Birthyear))][order(Age)][,xyplot(N ~ Age,type="b",ylim=c(0,20000),col="red",lwd=3,cex=2,pch=19,
 		main="Status Active,No Ballot Recorded GE 2023 & Last Year Voted < 2020 & Age <= 80",
 		sub="For King County WA")]
-		
-
-
-
-	
-
-
-
-
-
-
-
-
-
